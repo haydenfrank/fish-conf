@@ -14,10 +14,25 @@ if status is-interactive # Commands to run in interactive sessions can go here
     # Use starship
     starship init fish | source
     if not set -q TMUX
-    if test -f ~/.local/state/quickshell/user/generated/terminal/sequences.txt
-        cat  ~/.config/fish/terminal-sequences/gruvbox.txt
+        # Use the theme written by the waybar switcher (if present), else fall back
+        # to gruvbox. switch-colors writes the active theme name to
+        # ~/.config/fish/current_theme and also writes an optional
+        # terminal-sequences/active.txt file.
+        set -l theme_file "$HOME/.config/fish/current_theme"
+        if test -f "$theme_file"
+            set -g theme (string trim (cat "$theme_file"))
+        else
+            set -g theme gruvbox
+        end
+
+        set -l seq_file "$HOME/.config/fish/terminal-sequences/$theme.txt"
+        if test -f "$seq_file"
+            cat "$seq_file"
+        else if test -f "$HOME/.config/fish/terminal-sequences/active.txt"
+            cat "$HOME/.config/fish/terminal-sequences/active.txt"
+        end
     end
-end
+
     clear
 
     # Aliases
@@ -27,7 +42,7 @@ end
     alias ls 'eza --icons'
     alias pamcan pacman
     alias q 'qs -c ii'
-    
+
 end
 
 # opencode
